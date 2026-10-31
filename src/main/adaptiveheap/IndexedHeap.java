@@ -1,7 +1,6 @@
 package adaptiveheap;
 
 import java.util.NoSuchElementException;
-import map.HashMap;
 import map.Map;
 
 /**
@@ -30,9 +29,8 @@ public class IndexedHeap<T> implements AdaptivePriorityQueue<T> {
 
   @SuppressWarnings("unchecked")
   public IndexedHeap() {
-    heap = (Entry<T>[]) new Entry[10];
-    index = new HashMap<>();
-    size = 0;
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   @Override

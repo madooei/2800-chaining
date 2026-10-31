@@ -45,9 +45,8 @@ public class HashMap<K, V> implements Map<K, V> {
   // buckets only ever holds Entry<K, V>, so the cast is safe.
   @SuppressWarnings("unchecked")
   public HashMap() {
-    buckets = (Entry<K, V>[]) new Entry[PRIMES[0]];  // start with 7 slots
-    size = 0;                                        // the map starts empty
-    primeIndex = 0;                                  // the capacity is PRIMES[0]
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   @Override
@@ -57,79 +56,26 @@ public class HashMap<K, V> implements Map<K, V> {
 
   @Override
   public boolean put(K key, V value) {
-    if (key == null || value == null) {
-      throw new IllegalArgumentException();
-    }
-    int i = indexFor(key);
-    Entry<K, V> previous = null;
-    for (Entry<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        e.value = value;  // key present; replace its value
-        return false;
-      }
-      previous = e;
-    }
-    Entry<K, V> newEntry = new Entry<>(key, value);
-    if (previous == null) {
-      buckets[i] = newEntry;     // the bucket was empty
-    } else {
-      previous.next = newEntry;  // append after the last entry
-    }
-    size++;
-    if (size > 0.75 * buckets.length) {  // the load factor passed 0.75
-      rehash();
-    }
-    return true;
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   @Override
   public V get(K key) {
-    if (key == null) {
-      throw new IllegalArgumentException();
-    }
-    int i = indexFor(key);
-    for (Entry<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        return e.value;  // found the key
-      }
-    }
-    return null;  // key not present
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   @Override
   public boolean containsKey(K key) {
-    if (key == null) {
-      throw new IllegalArgumentException();
-    }
-    int i = indexFor(key);
-    for (Entry<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        return true;
-      }
-    }
-    return false;
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   @Override
   public boolean remove(K key) {
-    if (key == null) {
-      throw new IllegalArgumentException();
-    }
-    int i = indexFor(key);
-    Entry<K, V> previous = null;
-    for (Entry<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        if (previous == null) {
-          buckets[i] = e.next;      // the match was the head of the bucket
-        } else {
-          previous.next = e.next;   // unlink the match
-        }
-        size--;
-        return true;
-      }
-      previous = e;
-    }
-    return false;  // not found; nothing changed
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   @Override
@@ -144,7 +90,8 @@ public class HashMap<K, V> implements Map<K, V> {
 
   // Turns a key into the slot of its bucket: hash, then compress to the array's range.
   private int indexFor(K key) {
-    return Math.floorMod(key.hashCode(), buckets.length);
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   // Grows the table to the next prime and places every entry at the slot the
@@ -152,25 +99,8 @@ public class HashMap<K, V> implements Map<K, V> {
   // constructor.
   @SuppressWarnings("unchecked")
   private void rehash() {
-    Entry<K, V>[] old = buckets;
-    int capacity;
-    if (primeIndex + 1 < PRIMES.length) {
-      capacity = PRIMES[++primeIndex];   // the next prime, already more than double
-    } else {
-      capacity = 2 * old.length + 1;     // past the table: double and add one to stay odd
-    }
-    buckets = (Entry<K, V>[]) new Entry[capacity];
-
-    for (Entry<K, V> head : old) {                          // each old bucket
-      Entry<K, V> e = head;
-      while (e != null) {
-        Entry<K, V> next = e.next;                          // save the rest before relinking
-        int i = Math.floorMod(e.key.hashCode(), capacity);  // the entry's slot in the new array
-        e.next = buckets[i];                                // move e to the front of its new bucket
-        buckets[i] = e;
-        e = next;
-      }
-    }
+    // TODO: Implement me
+    throw new UnsupportedOperationException("TODO: Implement me");
   }
 
   // Visits each slot in order and walks its bucket, returning each entry's key.
