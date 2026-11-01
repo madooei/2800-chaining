@@ -11,7 +11,7 @@ import map.Map;
  *
  * @param <T> the type of items in this priority queue
  */
-public class IndexedHeap<T> implements AdaptivePriorityQueue<T> {
+public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
 
   // An item together with its priority.
   private static final class Entry<T> {
@@ -29,7 +29,7 @@ public class IndexedHeap<T> implements AdaptivePriorityQueue<T> {
   private int size;
 
   @SuppressWarnings("unchecked")
-  public IndexedHeap() {
+  public IndexedArrayHeap() {
     heap = (Entry<T>[]) new Entry[10];
     index = new HashMap<>();
     size = 0;

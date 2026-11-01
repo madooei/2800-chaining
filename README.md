@@ -23,14 +23,14 @@ code/
         Main.java                       # demo entry point (the chapter's trace)
       adaptiveheap/
         AdaptivePriorityQueue.java      # the AdaptivePriorityQueue ADT
-        IndexedHeap.java                # a binary heap with a HashMap as its index map
+        IndexedArrayHeap.java           # a binary heap with a HashMap as its index map
         Main.java                       # demo entry point (the adaptive heap chapter's trace)
     test/
       map/
         MapTest.java                    # abstract: the Map contract suite
         HashMapTest.java                # runs it against HashMap, then checks the buckets by reflection
       adaptiveheap/
-        IndexedHeapTest.java            # the contract, plus the heap and map by reflection
+        IndexedArrayHeapTest.java       # the contract, plus the heap and map by reflection
   scripts/
     run.sh                              # compile and run a demo (map.Main by default)
     test.sh                             # compile and run the JUnit tests
@@ -48,7 +48,7 @@ code/
 - `map.Map<K, V>`: the Map ADT, copied unchanged from the earlier chapters.
 - `map.HashMap<K, V>`: the chapter's hash table. It has `put`, `get`, `containsKey`, `remove`, and `size`, and the two iterators the `Map` interface asks for, `iterator()` over the keys and `entries()` over the pairs.
 - `map.Main`: runs the chapter's trace, with `bee`, `pig`, and `hen` sharing one bucket.
-- `adaptiveheap.AdaptivePriorityQueue<T>` and `adaptiveheap.IndexedHeap<T>`: copied from the adaptive priority queue chapter. The only change is the index map, now a `HashMap`, so the items no longer need to be `Comparable`.
+- `adaptiveheap.AdaptivePriorityQueue<T>` and `adaptiveheap.IndexedArrayHeap<T>`: copied from the adaptive priority queue chapter. The only change is the index map, now a `HashMap`, so the items no longer need to be `Comparable`.
 - `adaptiveheap.Main`: runs the adaptive priority queue chapter's trace.
 - `map.MapTest` and `map.HashMapTest`: the Map contract suite, run against `HashMap`, then the slots and bucket order the notes draw, read through reflection.
-- `adaptiveheap.IndexedHeapTest`: the test suite from the adaptive priority queue chapter, plus one test that the items need not be `Comparable`.
+- `adaptiveheap.IndexedArrayHeapTest`: the test suite from the adaptive priority queue chapter, plus one test that the items need not be `Comparable`.

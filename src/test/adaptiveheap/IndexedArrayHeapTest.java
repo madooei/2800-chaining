@@ -15,18 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Tests for IndexedHeap. The first group checks the AdaptivePriorityQueue
+ * Tests for IndexedArrayHeap. The first group checks the AdaptivePriorityQueue
  * contract through the public methods. The second group reads the private heap
  * array and index map by reflection, to check the slots the notes draw and that
  * every item's map entry names the slot it occupies.
  */
-public class IndexedHeapTest {
+public class IndexedArrayHeapTest {
 
-  private IndexedHeap<String> heap;
+  private IndexedArrayHeap<String> heap;
 
   @BeforeEach
   public void setup() {
-    heap = new IndexedHeap<>();
+    heap = new IndexedArrayHeap<>();
   }
 
   @Test
@@ -195,7 +195,7 @@ public class IndexedHeapTest {
 
   @Test
   public void itemsNeedNotBeComparable() {
-    IndexedHeap<Object> objects = new IndexedHeap<>();
+    IndexedArrayHeap<Object> objects = new IndexedArrayHeap<>();
     Object first = new Object();
     Object second = new Object();
     objects.add(first, 5);
@@ -332,7 +332,7 @@ public class IndexedHeapTest {
   }
 
   // Removes every item, highest priority first, and returns them in that order.
-  private static List<String> drain(IndexedHeap<String> heap) {
+  private static List<String> drain(IndexedArrayHeap<String> heap) {
     List<String> served = new ArrayList<>();
     while (heap.size() > 0) {
       served.add(heap.peek());
@@ -350,7 +350,7 @@ public class IndexedHeapTest {
   }
 
   // Checks the items and priorities in the filled slots, in index order.
-  private static void assertSlots(IndexedHeap<String> heap, List<String> items,
+  private static void assertSlots(IndexedArrayHeap<String> heap, List<String> items,
       int... priorities) {
     Object[] entries = entries(heap);
     assertEquals(items.size(), heap.size());
@@ -361,7 +361,7 @@ public class IndexedHeapTest {
   }
 
   // Checks that every item's map entry is the slot it occupies.
-  private static void assertIndexMapMatchesHeap(IndexedHeap<String> heap) {
+  private static void assertIndexMapMatchesHeap(IndexedArrayHeap<String> heap) {
     Object[] entries = entries(heap);
     Map<String, Integer> index = indexMap(heap);
     assertEquals(heap.size(), index.size());
@@ -370,12 +370,12 @@ public class IndexedHeapTest {
     }
   }
 
-  private static Object[] entries(IndexedHeap<String> heap) {
+  private static Object[] entries(IndexedArrayHeap<String> heap) {
     return (Object[]) readField(heap, "heap");
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<String, Integer> indexMap(IndexedHeap<String> heap) {
+  private static Map<String, Integer> indexMap(IndexedArrayHeap<String> heap) {
     return (Map<String, Integer>) readField(heap, "index");
   }
 
