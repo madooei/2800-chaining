@@ -1,6 +1,7 @@
 package adaptiveheap;
 
 import java.util.NoSuchElementException;
+import map.HashMap;
 import map.Map;
 
 /**
@@ -30,8 +31,9 @@ public class IndexedArrayHeap<T, P extends Comparable<P>> implements AdaptivePri
 
   @SuppressWarnings("unchecked")
   public IndexedArrayHeap() {
-    // TODO: Implement me
-    throw new UnsupportedOperationException("TODO: Implement me");
+    heap = (Entry<T, P>[]) new Entry[10];
+    index = new HashMap<>();
+    size = 0;
   }
 
   @Override
