@@ -19,16 +19,16 @@ public class HashMap<K, V> implements Map<K, V> {
 
   private static final double MAX_LOAD_FACTOR = 0.75;
 
-  private Entry<K, V>[] buckets;  // one bucket per slot, or null when the slot is empty
-  private int size;               // how many pairs the map holds
-  private int primeIndex;         // the current capacity is PRIMES[primeIndex]
+  private Node<K, V>[] buckets;  // one bucket per slot, or null when the slot is empty
+  private int size;              // how many pairs the map holds
+  private int primeIndex;        // the current capacity is PRIMES[primeIndex]
 
-  private static class Entry<K, V> implements Map.Entry<K, V> {
+  private static class Node<K, V> implements Map.Entry<K, V> {
     K key;
     V value;
-    Entry<K, V> next;
+    Node<K, V> next;
 
-    Entry(K key, V value) {
+    Node(K key, V value) {
       this.key = key;
       this.value = value;
     }
@@ -44,7 +44,7 @@ public class HashMap<K, V> implements Map<K, V> {
     }
   }
 
-  // buckets only ever holds Entry<K, V>, so the cast is safe.
+  // buckets only ever holds Node<K, V>, so the cast is safe.
   @SuppressWarnings("unchecked")
   public HashMap() {
     // TODO: Implement me
@@ -108,8 +108,8 @@ public class HashMap<K, V> implements Map<K, V> {
 
   // Visits each slot in order and traverses its bucket, returning each entry's key.
   private class KeyIterator implements Iterator<K> {
-    private Entry<K, V> current;  // the entry whose key comes next, or null when the traversal is done
-    private int slot = 0;         // the next slot to try when the current bucket runs out
+    private Node<K, V> current;  // the entry whose key comes next, or null when the traversal is done
+    private int slot = 0;        // the next slot to try when the current bucket runs out
 
     KeyIterator() {
       advance();  // position current on the first entry, if there is one
@@ -151,8 +151,8 @@ public class HashMap<K, V> implements Map<K, V> {
 
   // Visits each slot in order and traverses its bucket, returning each entry itself.
   private class EntryIterator implements Iterator<Map.Entry<K, V>> {
-    private Entry<K, V> current;  // the entry that comes next, or null when the traversal is done
-    private int slot = 0;         // the next slot to try when the current bucket runs out
+    private Node<K, V> current;  // the entry that comes next, or null when the traversal is done
+    private int slot = 0;        // the next slot to try when the current bucket runs out
 
     EntryIterator() {
       advance();  // position current on the first entry, if there is one
@@ -178,9 +178,9 @@ public class HashMap<K, V> implements Map<K, V> {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      Entry<K, V> entry = current;
+      Node<K, V> node = current;
       advance();
-      return entry;
+      return node;
     }
   }
 }
