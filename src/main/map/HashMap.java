@@ -142,12 +142,12 @@ public class HashMap<K, V> implements Map<K, V> {
     return new Entries();
   }
 
-  // Turns a key into the slot of its bucket: hash, then compress to the array's range.
+  // Turns a key into the index of its bucket's slot: hash, then compress to the array's range.
   private int indexFor(K key) {
     return Math.floorMod(key.hashCode(), buckets.length);
   }
 
-  // Grows the table to the next prime and places every entry at the slot the
+  // Grows the table to the next prime and places every entry at the index the
   // new capacity gives it. size does not change. Same cast rationale as the
   // constructor.
   @SuppressWarnings("unchecked")
@@ -165,7 +165,7 @@ public class HashMap<K, V> implements Map<K, V> {
       Entry<K, V> e = head;
       while (e != null) {
         Entry<K, V> next = e.next;                          // save the rest before relinking
-        int i = Math.floorMod(e.key.hashCode(), capacity);  // the entry's slot in the new array
+        int i = Math.floorMod(e.key.hashCode(), capacity);  // the entry's index in the new array
         e.next = buckets[i];                                // move e to the front of its new bucket
         buckets[i] = e;
         e = next;
@@ -173,9 +173,9 @@ public class HashMap<K, V> implements Map<K, V> {
     }
   }
 
-  // Visits each slot in order and walks its bucket, returning each entry's key.
+  // Visits each slot in order and traverses its bucket, returning each entry's key.
   private class KeyIterator implements Iterator<K> {
-    private Entry<K, V> current;  // the entry whose key comes next, or null when the walk is done
+    private Entry<K, V> current;  // the entry whose key comes next, or null when the traversal is done
     private int slot = 0;         // the next slot to try when the current bucket runs out
 
     KeyIterator() {
@@ -216,9 +216,9 @@ public class HashMap<K, V> implements Map<K, V> {
     }
   }
 
-  // Visits each slot in order and walks its bucket, returning each entry itself.
+  // Visits each slot in order and traverses its bucket, returning each entry itself.
   private class EntryIterator implements Iterator<Map.Entry<K, V>> {
-    private Entry<K, V> current;  // the entry that comes next, or null when the walk is done
+    private Entry<K, V> current;  // the entry that comes next, or null when the traversal is done
     private int slot = 0;         // the next slot to try when the current bucket runs out
 
     EntryIterator() {
