@@ -17,6 +17,8 @@ public class HashMap<K, V> implements Map<K, V> {
       10949, 21911, 43853, 87719, 175447, 350899, 701819, 1403641
   };
 
+  private static final double MAX_LOAD_FACTOR = 0.75;
+
   private Entry<K, V>[] buckets;  // one bucket per slot, or null when the slot is empty
   private int size;               // how many pairs the map holds
   private int primeIndex;         // the current capacity is PRIMES[primeIndex]
