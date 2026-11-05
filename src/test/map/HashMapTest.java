@@ -6,12 +6,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Runs the Map contract suite against HashMap, then reads its buckets by
- * reflection to check the slots and bucket order the notes draw.
- */
+/** Runs the Map contract suite against HashMap. */
 public class HashMapTest extends MapTest {
 
   @Override
@@ -44,9 +43,68 @@ public class HashMapTest extends MapTest {
   }
 
   @Test
+  public void putPlacesANegativeHashCodeInSlotRange() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("elephant", 1);  // hashCode -5491951, and floorMod(-5491951, 7) is 4
+    assertEquals(listOf("elephant"), keysInSlot(table, 4));
+  }
+
+  @Test
+  public void putKeepsDifferentKeysWithTheSameHashCode() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("Aa", 1);  // "Aa" and "BB" both have hashCode 2112
+    table.put("BB", 2);
+    assertEquals(listOf("Aa", "BB"), keysInSlot(table, 5));
+  }
+
+  @Test
+  public void getSeparatesDifferentKeysWithTheSameHashCode() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("Aa", 1);
+    table.put("BB", 2);
+    assertEquals(2, table.get("BB"));
+  }
+
+  @Test
+  public void containsKeySeparatesDifferentKeysWithTheSameHashCode() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("Aa", 1);
+    assertFalse(table.containsKey("BB"));
+  }
+
+  @Test
+  public void removeSeparatesDifferentKeysWithTheSameHashCode() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("Aa", 1);
+    table.put("BB", 2);
+    table.remove("BB");
+    assertEquals(listOf("Aa"), keysInSlot(table, 5));
+  }
+
+  @Test
+  public void putMatchesAnExistingKeyByEquals() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("cat", 10);
+    assertFalse(table.put(new String("cat"), 20));
+  }
+
+  @Test
+  public void removeMatchesAKeyByEquals() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("cat", 10);
+    assertTrue(table.remove(new String("cat")));
+  }
+
+  @Test
   public void getFindsTheLastKeyInABucket() {
     HashMap<String, Integer> table = fourKeys();
     assertEquals(60, table.get("hen"));
+  }
+
+  @Test
+  public void containsKeyFindsTheLastKeyInABucket() {
+    HashMap<String, Integer> table = fourKeys();
+    assertTrue(table.containsKey("hen"));
   }
 
   @Test
@@ -112,6 +170,14 @@ public class HashMapTest extends MapTest {
   }
 
   @Test
+  public void putExistingKeyAtTheLoadFactorLimitKeepsSevenSlots() {
+    HashMap<String, Integer> table = fourKeys();
+    table.put("fox", 70);
+    table.put("bee", 99);
+    assertEquals(7, bucketsOf(table).length);
+  }
+
+  @Test
   public void sixthPutGrowsToSeventeenSlots() {
     HashMap<String, Integer> table = sixKeys();
     assertEquals(17, bucketsOf(table).length);
@@ -133,6 +199,15 @@ public class HashMapTest extends MapTest {
       table.put("k" + i, i);
     }
     assertEquals(37, bucketsOf(table).length);
+  }
+
+  @Test
+  public void putPastTheLastPrimeDoublesAndAddsOne() {
+    HashMap<String, Integer> table = new HashMap<>();
+    for (int i = 1; i <= 1052731; i++) {  // the first count above 0.75 * 1403641
+      table.put("k" + i, i);
+    }
+    assertEquals(2 * 1403641 + 1, bucketsOf(table).length);
   }
 
   @Test

@@ -9,23 +9,24 @@ import map.Map;
  * occupies.
  *
  * @param <T> the type of items in this priority queue
+ * @param <P> the type of priorities
  */
-public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
+public class IndexedArrayHeap<T, P extends Comparable<P>> implements AdaptivePriorityQueue<T, P> {
+
+  private Entry<T, P>[] heap;     // the complete tree, stored in level order
+  private Map<T, Integer> index;  // each item to the slot it occupies
+  private int size;
 
   // An item together with its priority.
-  private static final class Entry<T> {
+  private static class Entry<T, P> {
     T item;
-    int priority;
+    P priority;
 
-    Entry(T item, int priority) {
+    Entry(T item, P priority) {
       this.item = item;
       this.priority = priority;
     }
   }
-
-  private Entry<T>[] heap;        // the complete tree, stored in level order
-  private Map<T, Integer> index;  // each item to the slot it occupies
-  private int size;
 
   @SuppressWarnings("unchecked")
   public IndexedArrayHeap() {
@@ -47,8 +48,8 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
   }
 
   @Override
-  public void add(T item, int priority) {
-    if (item == null || index.containsKey(item)) {
+  public void add(T item, P priority) {
+    if (item == null || priority == null || index.containsKey(item)) {
       throw new IllegalArgumentException();
     }
     if (size == heap.length) {
@@ -65,14 +66,11 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
     if (size == 0) {
       throw new NoSuchElementException();
     }
-    index.remove(heap[0].item);  // the root item is leaving
-    heap[0] = heap[size - 1];    // move the last entry into the root
-    heap[size - 1] = null;       // clear the vacated slot
+    swap(0, size - 1);                  // the root item moves to the last slot
+    index.remove(heap[size - 1].item);  // the root item is leaving
+    heap[size - 1] = null;              // clear the vacated slot
     size--;
-    if (size > 0) {
-      index.put(heap[0].item, 0);  // the moved item now sits at the root
-      sink(0);
-    }
+    sink(0);
   }
 
   @Override
@@ -84,27 +82,27 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
   }
 
   @Override
-  public void changePriority(T item, int priority) {
-    if (item == null) {
+  public void changePriority(T item, P priority) {
+    if (item == null || priority == null) {
       throw new IllegalArgumentException();
     }
     Integer i = index.get(item);  // where the item sits, or null if absent
     if (i == null) {
       throw new NoSuchElementException();
     }
-    int old = heap[i].priority;
+    P old = heap[i].priority;
     heap[i].priority = priority;
-    if (priority < old) {
+    if (compare(priority, old) < 0) {
       swim(i);  // higher priority now: move up
-    } else if (priority > old) {
+    } else if (compare(priority, old) > 0) {
       sink(i);  // lower priority now: move down
     }
   }
 
-  // Returns a negative number if a has higher priority than b, zero if they
-  // tie, and a positive number if a has lower priority.
-  private int compare(Entry<T> a, Entry<T> b) {
-    return Integer.compare(a.priority, b.priority);
+  // Returns a negative number if priority a is served before b, zero if they
+  // tie, and a positive number if a is served after b.
+  private int compare(P a, P b) {
+    return a.compareTo(b);
   }
 
   // The parent of the node at index i. Pre: i > 0.
@@ -125,7 +123,7 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
   // Exchanges the entries at indices i and j, and records their new slots in
   // the index map.
   private void swap(int i, int j) {
-    Entry<T> temp = heap[i];
+    Entry<T, P> temp = heap[i];
     heap[i] = heap[j];
     heap[j] = temp;
     index.put(heap[i].item, i);  // the item now at i sits at i
@@ -134,7 +132,7 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
 
   // Moves the entry at index i up until it does not outrank its parent.
   private void swim(int i) {
-    while (i > 0 && compare(heap[i], heap[parent(i)]) < 0) {
+    while (i > 0 && compare(heap[i].priority, heap[parent(i)].priority) < 0) {
       swap(i, parent(i));
       i = parent(i);
     }
@@ -145,10 +143,10 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
     while (leftChild(i) < size) {  // stop at a leaf
       int best = leftChild(i);
       int right = rightChild(i);
-      if (right < size && compare(heap[right], heap[best]) < 0) {
+      if (right < size && compare(heap[right].priority, heap[best].priority) < 0) {
         best = right;
       }
-      if (compare(heap[best], heap[i]) >= 0) {
+      if (compare(heap[best].priority, heap[i].priority) >= 0) {
         break;  // no child outranks the entry
       }
       swap(i, best);
@@ -159,7 +157,7 @@ public class IndexedArrayHeap<T> implements AdaptivePriorityQueue<T> {
   // Doubles the capacity.
   @SuppressWarnings("unchecked")
   private void grow() {
-    Entry<T>[] bigger = (Entry<T>[]) new Entry[heap.length * 2];
+    Entry<T, P>[] bigger = (Entry<T, P>[]) new Entry[heap.length * 2];
     for (int i = 0; i < size; i++) {
       bigger[i] = heap[i];
     }

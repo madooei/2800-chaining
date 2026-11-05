@@ -4,323 +4,167 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.NoSuchElementException;
 import map.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Tests for IndexedArrayHeap. The first group checks the AdaptivePriorityQueue
- * contract through the public methods. The second group reads the private heap
- * array and index map by reflection, to check the slots the notes draw and that
- * every item's map entry names the slot it occupies.
- */
-public class IndexedArrayHeapTest {
+/** Runs the AdaptivePriorityQueue contract suite against IndexedArrayHeap. */
+public class IndexedArrayHeapTest extends AdaptivePriorityQueueTest {
 
-  private IndexedArrayHeap<String> heap;
-
-  @BeforeEach
-  public void setup() {
-    heap = new IndexedArrayHeap<>();
-  }
-
-  @Test
-  public void newHeapIsEmpty() {
-    assertEquals(0, heap.size());
-  }
-
-  @Test
-  public void peekOnEmptyHeapThrows() {
-    try {
-      heap.peek();
-      fail("expected NoSuchElementException when peeking an empty queue");
-    } catch (NoSuchElementException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void removeOnEmptyHeapThrows() {
-    try {
-      heap.remove();
-      fail("expected NoSuchElementException when removing from an empty queue");
-    } catch (NoSuchElementException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void addNullThrows() {
-    try {
-      heap.add(null, 1);
-      fail("expected IllegalArgumentException when adding null");
-    } catch (IllegalArgumentException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void addDuplicateThrows() {
-    heap.add("Amy", 5);
-    try {
-      heap.add("Amy", 2);
-      fail("expected IllegalArgumentException when adding an item twice");
-    } catch (IllegalArgumentException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void addDuplicateKeepsTheSize() {
-    heap.add("Amy", 5);
-    try {
-      heap.add("Amy", 2);
-    } catch (IllegalArgumentException e) {
-      // expected
-    }
-    assertEquals(1, heap.size());
-  }
-
-  @Test
-  public void changePriorityOfNullThrows() {
-    try {
-      heap.changePriority(null, 1);
-      fail("expected IllegalArgumentException when changing the priority of null");
-    } catch (IllegalArgumentException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void changePriorityOfAbsentItemThrows() {
-    heap.add("Amy", 5);
-    try {
-      heap.changePriority("Bob", 1);
-      fail("expected NoSuchElementException when the item is not in the queue");
-    } catch (NoSuchElementException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void containsNullThrows() {
-    try {
-      heap.contains(null);
-      fail("expected IllegalArgumentException when asking for null");
-    } catch (IllegalArgumentException e) {
-      return;
-    }
-  }
-
-  @Test
-  public void containsReportsMembership() {
-    heap.add("Amy", 5);
-    heap.add("Bob", 8);
-    assertTrue(heap.contains("Amy"));
-    assertTrue(heap.contains("Bob"));
-    assertFalse(heap.contains("Cal"));
-  }
-
-  @Test
-  public void containsIsFalseAfterTheItemIsRemoved() {
-    heap.add("Amy", 5);
-    heap.add("Bob", 8);
-    heap.remove();
-    assertFalse(heap.contains("Amy"));
-    assertTrue(heap.contains("Bob"));
-  }
-
-  @Test
-  public void peekReturnsTheSmallestPriority() {
-    heap.add("Amy", 5);
-    heap.add("Bob", 8);
-    heap.add("Cal", 3);
-    assertEquals("Cal", heap.peek());
-  }
-
-  @Test
-  public void sizeCountsTheAddedItems() {
-    heap.add("Amy", 5);
-    heap.add("Bob", 8);
-    heap.add("Cal", 3);
-    assertEquals(3, heap.size());
-  }
-
-  @Test
-  public void removeServesItemsInPriorityOrder() {
-    heap.add("Amy", 5);
-    heap.add("Bob", 8);
-    heap.add("Cal", 3);
-    heap.add("Dan", 6);
-    heap.add("Eve", 1);
-    assertEquals(listOf("Eve", "Cal", "Amy", "Dan", "Bob"), drain(heap));
-  }
-
-  @Test
-  public void decreaseKeyMovesTheItemToTheFront() {
-    heap.add("Jane", 4);
-    heap.add("Bob", 2);
-    heap.changePriority("Jane", 1);
-    assertEquals("Jane", heap.peek());
-  }
-
-  @Test
-  public void increaseKeyMovesTheItemBack() {
-    heap.add("Amy", 1);
-    heap.add("Bob", 2);
-    heap.add("Cal", 3);
-    heap.changePriority("Amy", 9);
-    assertEquals(listOf("Bob", "Cal", "Amy"), drain(heap));
-  }
-
-  @Test
-  public void changeToTheSamePriorityKeepsTheOrder() {
-    heap.add("Amy", 1);
-    heap.add("Bob", 2);
-    heap.changePriority("Bob", 2);
-    assertEquals(listOf("Amy", "Bob"), drain(heap));
-  }
-
-  @Test
-  public void itemsMayShareAPriority() {
-    heap.add("Amy", 2);
-    heap.add("Bob", 2);
-    assertEquals(2, drain(heap).size());
-  }
-
-  @Test
-  public void itemsNeedNotBeComparable() {
-    IndexedArrayHeap<Object> objects = new IndexedArrayHeap<>();
-    Object first = new Object();
-    Object second = new Object();
-    objects.add(first, 5);
-    objects.add(second, 3);
-    assertEquals(second, objects.peek());
-  }
-
-  @Test
-  public void addToAFullArrayDoublesItsCapacity() {
-    int capacity = entries(heap).length;
-    for (int i = 0; i <= capacity; i++) {  // one more than fits
-      heap.add("item" + i, i);
-    }
-    assertEquals(2 * capacity, entries(heap).length);
-    assertIndexMapMatchesHeap(heap);
-  }
-
-  // The five patients the notes start from: Amy 1, Bob 2, Cal 4, Dan 5, Eve 3.
-  private void addFivePatients() {
-    heap.add("Amy", 1);
-    heap.add("Bob", 2);
-    heap.add("Cal", 4);
-    heap.add("Dan", 5);
-    heap.add("Eve", 3);
+  @Override
+  protected AdaptivePriorityQueue<String, Integer> createQueue() {
+    return new IndexedArrayHeap<>();
   }
 
   @Test
   public void fivePatientsFillTheSlotsInOrder() {
-    addFivePatients();
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     assertSlots(heap, listOf("Amy", "Bob", "Cal", "Dan", "Eve"), 1, 2, 4, 5, 3);
+  }
+
+  @Test
+  public void fivePatientsAreRecordedInTheMap() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     assertIndexMapMatchesHeap(heap);
   }
 
   @Test
-  public void addSwimsTheNewItemAndUpdatesTheMap() {
-    addFivePatients();
+  public void addSwimsTheNewItem() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     heap.add("Fox", 0);
     assertSlots(heap, listOf("Fox", "Bob", "Amy", "Dan", "Eve", "Cal"), 0, 2, 1, 5, 3, 4);
+  }
+
+  @Test
+  public void addRecordsTheNewSlotsInTheMap() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
+    heap.add("Fox", 0);
     assertIndexMapMatchesHeap(heap);
   }
 
   @Test
-  public void removeSinksTheMovedItemAndUpdatesTheMap() {
-    addFivePatients();
+  public void removeOnlyItemClearsTheRoot() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    heap.add("Amy", 1);
+    heap.remove();
+    assertNull(entries(heap)[0]);
+  }
+
+  @Test
+  public void removeOnlyItemEmptiesTheMap() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    heap.add("Amy", 1);
+    heap.remove();
+    assertEquals(0, indexMap(heap).size());
+  }
+
+  @Test
+  public void removeRecordsTheRootSlotOfAnItemThatDoesNotSink() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    heap.add("Amy", 1);
+    heap.add("Bob", 2);
+    heap.remove();
+    assertIndexMapMatchesHeap(heap);
+  }
+
+  @Test
+  public void removeSinksTheMovedItem() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     heap.add("Fox", 0);
     heap.remove();
     assertSlots(heap, listOf("Amy", "Bob", "Cal", "Dan", "Eve"), 1, 2, 4, 5, 3);
+  }
+
+  @Test
+  public void removeRecordsTheNewSlotsInTheMap() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
+    heap.add("Fox", 0);
+    heap.remove();
     assertIndexMapMatchesHeap(heap);
-    assertNull(indexMap(heap).get("Fox"));
   }
 
   @Test
   public void removeClearsTheVacatedSlot() {
-    addFivePatients();
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     heap.remove();
     assertNull(entries(heap)[4]);
   }
 
   @Test
-  public void decreaseKeySwimsTheItemAndUpdatesTheMap() {
-    addFivePatients();
+  public void decreaseKeySwimsTheItem() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     heap.changePriority("Dan", 1);
     assertSlots(heap, listOf("Amy", "Dan", "Cal", "Bob", "Eve"), 1, 1, 4, 2, 3);
+  }
+
+  @Test
+  public void decreaseKeyRecordsTheNewSlotsInTheMap() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
+    heap.changePriority("Dan", 1);
     assertIndexMapMatchesHeap(heap);
   }
 
   @Test
-  public void increaseKeySinksTheItemAndUpdatesTheMap() {
-    addFivePatients();
+  public void increaseKeySinksTheItem() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
     heap.changePriority("Amy", 6);
     assertSlots(heap, listOf("Bob", "Eve", "Cal", "Dan", "Amy"), 2, 3, 4, 5, 6);
-    assertIndexMapMatchesHeap(heap);
-  }
-
-  // The trace in the notes: four adds, a changePriority, and a remove.
-  private void addFourPatients() {
-    heap.add("Amy", 5);
-    heap.add("Bob", 8);
-    heap.add("Cal", 3);
-    heap.add("Dan", 6);
   }
 
   @Test
-  public void traceAddsFillTheSlots() {
-    addFourPatients();
-    assertSlots(heap, listOf("Cal", "Dan", "Amy", "Bob"), 3, 6, 5, 8);
+  public void increaseKeyRecordsTheNewSlotsInTheMap() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
+    heap.changePriority("Amy", 6);
     assertIndexMapMatchesHeap(heap);
   }
 
   @Test
-  public void traceChangePrioritySwimsBobToTheRoot() {
-    addFourPatients();
-    heap.changePriority("Bob", 2);
-    assertSlots(heap, listOf("Bob", "Cal", "Amy", "Dan"), 2, 3, 5, 6);
-    assertIndexMapMatchesHeap(heap);
+  public void increaseKeyToATieWithAChildLeavesTheItemInPlace() {
+    IndexedArrayHeap<String, Integer> heap = fivePatients();
+    heap.changePriority("Amy", 2);
+    assertSlots(heap, listOf("Amy", "Bob", "Cal", "Dan", "Eve"), 2, 2, 4, 5, 3);
   }
 
   @Test
-  public void traceRemoveSinksDan() {
-    addFourPatients();
-    heap.changePriority("Bob", 2);
-    heap.remove();
-    assertSlots(heap, listOf("Cal", "Dan", "Amy"), 3, 6, 5);
-    assertIndexMapMatchesHeap(heap);
-  }
-
-  // Forty adds, then a change to every third item's priority.
-  private void addAndChangeManyItems() {
-    for (int i = 0; i < 40; i++) {
-      heap.add("item" + i, (i * 17) % 23);
+  public void addToTheLastOpenSlotKeepsTheCapacity() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    int capacity = entries(heap).length;
+    for (int i = 0; i < capacity; i++) {  // exactly what fits
+      heap.add("item" + i, i);
     }
-    for (int i = 0; i < 40; i += 3) {
-      heap.changePriority("item" + i, (i * 7) % 29);
+    assertEquals(capacity, entries(heap).length);
+  }
+
+  @Test
+  public void addToAFullArrayDoublesItsCapacity() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    int capacity = entries(heap).length;
+    for (int i = 0; i <= capacity; i++) {  // one more than fits
+      heap.add("item" + i, i);
     }
+    assertEquals(2 * capacity, entries(heap).length);
+  }
+
+  @Test
+  public void addToAFullArrayKeepsTheMapCorrect() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    int capacity = entries(heap).length;
+    for (int i = 0; i <= capacity; i++) {  // one more than fits
+      heap.add("item" + i, i);
+    }
+    assertIndexMapMatchesHeap(heap);
   }
 
   @Test
   public void manyOperationsKeepTheMapCorrect() {
-    addAndChangeManyItems();
+    IndexedArrayHeap<String, Integer> heap = manyChangedItems();
     assertIndexMapMatchesHeap(heap);
   }
 
   @Test
   public void manyOperationsServeInPriorityOrder() {
-    addAndChangeManyItems();
+    IndexedArrayHeap<String, Integer> heap = manyChangedItems();
     List<Integer> served = new ArrayList<>();
     while (heap.size() > 0) {
       served.add(priorityOf(entries(heap)[0]));
@@ -331,14 +175,37 @@ public class IndexedArrayHeapTest {
     assertEquals(sorted, served);
   }
 
-  // Removes every item, highest priority first, and returns them in that order.
-  private static List<String> drain(IndexedArrayHeap<String> heap) {
-    List<String> served = new ArrayList<>();
-    while (heap.size() > 0) {
-      served.add(heap.peek());
-      heap.remove();
+  @Test
+  public void itemsNeedNotBeComparable() {
+    IndexedArrayHeap<Object, Integer> objects = new IndexedArrayHeap<>();
+    Object first = new Object();
+    Object second = new Object();
+    objects.add(first, 5);
+    objects.add(second, 3);
+    assertEquals(second, objects.peek());
+  }
+
+  // Amy 1, Bob 2, Cal 4, Dan 5, Eve 3, added in the order that needs no swaps.
+  private static IndexedArrayHeap<String, Integer> fivePatients() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    heap.add("Amy", 1);
+    heap.add("Bob", 2);
+    heap.add("Cal", 4);
+    heap.add("Dan", 5);
+    heap.add("Eve", 3);
+    return heap;
+  }
+
+  // Forty adds, then a change to every third item's priority.
+  private static IndexedArrayHeap<String, Integer> manyChangedItems() {
+    IndexedArrayHeap<String, Integer> heap = new IndexedArrayHeap<>();
+    for (int i = 0; i < 40; i++) {
+      heap.add("item" + i, (i * 17) % 23);
     }
-    return served;
+    for (int i = 0; i < 40; i += 3) {
+      heap.changePriority("item" + i, (i * 7) % 29);
+    }
+    return heap;
   }
 
   private static List<String> listOf(String... items) {
@@ -350,8 +217,8 @@ public class IndexedArrayHeapTest {
   }
 
   // Checks the items and priorities in the filled slots, in index order.
-  private static void assertSlots(IndexedArrayHeap<String> heap, List<String> items,
-      int... priorities) {
+  private static void assertSlots(IndexedArrayHeap<String, Integer> heap,
+      List<String> items, int... priorities) {
     Object[] entries = entries(heap);
     assertEquals(items.size(), heap.size());
     for (int i = 0; i < heap.size(); i++) {
@@ -361,7 +228,7 @@ public class IndexedArrayHeapTest {
   }
 
   // Checks that every item's map entry is the slot it occupies.
-  private static void assertIndexMapMatchesHeap(IndexedArrayHeap<String> heap) {
+  private static void assertIndexMapMatchesHeap(IndexedArrayHeap<String, Integer> heap) {
     Object[] entries = entries(heap);
     Map<String, Integer> index = indexMap(heap);
     assertEquals(heap.size(), index.size());
@@ -370,12 +237,12 @@ public class IndexedArrayHeapTest {
     }
   }
 
-  private static Object[] entries(IndexedArrayHeap<String> heap) {
+  private static Object[] entries(IndexedArrayHeap<String, Integer> heap) {
     return (Object[]) readField(heap, "heap");
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<String, Integer> indexMap(IndexedArrayHeap<String> heap) {
+  private static Map<String, Integer> indexMap(IndexedArrayHeap<String, Integer> heap) {
     return (Map<String, Integer>) readField(heap, "index");
   }
 

@@ -30,7 +30,8 @@ code/
         MapTest.java                    # abstract: the Map contract suite
         HashMapTest.java                # runs it against HashMap, then checks the buckets by reflection
       adaptiveheap/
-        IndexedArrayHeapTest.java       # the contract, plus the heap and map by reflection
+        AdaptivePriorityQueueTest.java  # abstract: the AdaptivePriorityQueue contract suite
+        IndexedArrayHeapTest.java       # runs it against IndexedArrayHeap, then checks the heap and map by reflection
   scripts/
     run.sh                              # compile and run a demo (map.Main by default)
     test.sh                             # compile and run the JUnit tests
@@ -51,4 +52,4 @@ code/
 - `adaptiveheap.AdaptivePriorityQueue<T>` and `adaptiveheap.IndexedArrayHeap<T>`: copied from the adaptive priority queue chapter. The only change is the index map, now a `HashMap`, so the items no longer need to be `Comparable`.
 - `adaptiveheap.Main`: runs the adaptive priority queue chapter's trace.
 - `map.MapTest` and `map.HashMapTest`: the Map contract suite, run against `HashMap`, then the slots and bucket order the notes draw, read through reflection.
-- `adaptiveheap.IndexedArrayHeapTest`: the test suite from the adaptive priority queue chapter, plus one test that the items need not be `Comparable`.
+- `adaptiveheap.AdaptivePriorityQueueTest` and `adaptiveheap.IndexedArrayHeapTest`: the test suites from the adaptive priority queue chapter, plus one test that the items need not be `Comparable`.
