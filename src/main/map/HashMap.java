@@ -175,38 +175,23 @@ public class HashMap<K, V> implements Map<K, V> {
     }
   }
 
-  // Visits each slot in order and traverses its bucket, returning each entry's key.
+  // Returns the key of each entry, using an EntryIterator for the traversal.
   private class KeyIterator implements Iterator<K> {
-    private Node<K, V> current;  // the entry whose key comes next, or null when the traversal is done
-    private int slot = 0;        // the next slot to try when the current bucket runs out
+    private Iterator<Map.Entry<K, V>> entries;  // the traversal this iterator takes its keys from
 
     KeyIterator() {
-      advance();  // position current on the first entry, if there is one
-    }
-
-    private void advance() {
-      if (current != null) {
-        current = current.next;    // the next entry in the same bucket
-      }
-      while (current == null && slot < buckets.length) {
-        current = buckets[slot];   // the head of the next bucket, or null for an empty slot
-        slot++;
-      }
+      entries = new EntryIterator();
     }
 
     @Override
     public boolean hasNext() {
-      return current != null;
+      return entries.hasNext();
     }
 
     @Override
     public K next() {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-      K key = current.key;
-      advance();
-      return key;
+      Map.Entry<K, V> entry = entries.next();
+      return entry.key();
     }
   }
 
