@@ -107,15 +107,10 @@ public class HashMap<K, V> implements Map<K, V> {
     throw new UnsupportedOperationException("TODO: Implement me");
   }
 
-  // Visits each slot in order and traverses its bucket, returning each entry's key.
+  // Returns the key of each entry, using an EntryIterator for the traversal.
   private class KeyIterator implements Iterator<K> {
 
     KeyIterator() {
-      // TODO: Implement me
-      throw new UnsupportedOperationException("TODO: Implement me");
-    }
-
-    private void advance() {
       // TODO: Implement me
       throw new UnsupportedOperationException("TODO: Implement me");
     }
