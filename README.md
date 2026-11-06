@@ -51,5 +51,5 @@ code/
 - `map.Main`: runs the chapter's trace, with `bee`, `pig`, and `hen` sharing one bucket.
 - `adaptiveheap.AdaptivePriorityQueue<T>` and `adaptiveheap.IndexedArrayHeap<T>`: copied from the adaptive priority queue chapter. The only change is the index map, now a `HashMap`, so the items no longer need to be `Comparable`.
 - `adaptiveheap.Main`: runs the adaptive priority queue chapter's trace.
-- `map.MapTest` and `map.HashMapTest`: the Map contract suite, run against `HashMap`, then the slots and bucket order the notes draw, read through reflection.
+- `map.MapTest` and `map.HashMapTest`: the Map contract suite, run against `HashMap`, then the slots and bucket order the notes draw, read through reflection, and the order the iterators visit the keys.
 - `adaptiveheap.AdaptivePriorityQueueTest` and `adaptiveheap.IndexedArrayHeapTest`: the test suites from the adaptive priority queue chapter, plus one test that the items need not be `Comparable`.

@@ -2,6 +2,7 @@ package map;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -157,9 +158,42 @@ public class HashMapTest extends MapTest {
     HashMap<String, Integer> table = fourKeys();
     List<String> seen = new ArrayList<>();
     for (Map.Entry<String, Integer> entry : table.entries()) {
-      seen.add(entry.key());
+      seen.add(entry.key() + "=" + entry.value());
     }
-    assertEquals(listOf("cat", "bee", "pig", "hen"), seen);
+    assertEquals(listOf("cat=10", "bee=40", "pig=50", "hen=60"), seen);
+  }
+
+  @Test
+  public void iteratorSkipsEmptySlotsAtTheFront() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("fox", 70);  // slot 6, the last slot
+    assertEquals("fox", table.iterator().next());
+  }
+
+  @Test
+  public void iteratorSkipsEmptySlotsAtTheEnd() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("cat", 10);  // slot 3
+    Iterator<String> it = table.iterator();
+    it.next();
+    assertFalse(it.hasNext());
+  }
+
+  @Test
+  public void iteratorVisitsEveryKeyInABucket() {
+    HashMap<String, Integer> table = new HashMap<>();
+    table.put("bee", 40);  // bee, pig, and hen all go to slot 5
+    table.put("pig", 50);
+    table.put("hen", 60);
+    assertEquals(listOf("bee", "pig", "hen"), keysOf(table));
+  }
+
+  @Test
+  public void iteratorOrderChangesAfterTheTableGrows() {
+    HashMap<String, Integer> table = sixKeys();  // the sixth put grows the table to 17 slots
+    table.remove("fox");
+    table.remove("dog");
+    assertEquals(listOf("bee", "cat", "hen", "pig"), keysOf(table));
   }
 
   @Test
@@ -255,6 +289,14 @@ public class HashMapTest extends MapTest {
       list.add(key);
     }
     return list;
+  }
+
+  private static List<String> keysOf(HashMap<String, Integer> table) {
+    List<String> keys = new ArrayList<>();
+    for (String key : table) {
+      keys.add(key);
+    }
+    return keys;
   }
 
   // The keys in the bucket at the given slot, from the head of the bucket on.
