@@ -63,20 +63,17 @@ public class HashMap<K, V> implements Map<K, V> {
       throw new IllegalArgumentException();
     }
     int i = indexFor(key);
-    Node<K, V> previous = null;
-    for (Node<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        e.value = value;  // key present; replace its value
+    Node<K, V> curr = buckets[i];
+    while (curr != null) {
+      if (curr.key.equals(key)) {
+        curr.value = value;  // key present; replace its value
         return false;
       }
-      previous = e;
+      curr = curr.next;
     }
-    Node<K, V> newNode = new Node<>(key, value);
-    if (previous == null) {
-      buckets[i] = newNode;     // the bucket was empty
-    } else {
-      previous.next = newNode;  // append after the last entry
-    }
+    Node<K, V> node = new Node<>(key, value);
+    node.next = buckets[i];  // the new entry goes at the head of the bucket
+    buckets[i] = node;
     size++;
     if (size > MAX_LOAD_FACTOR * buckets.length) {  // the load factor passed the threshold
       rehash();
@@ -90,10 +87,12 @@ public class HashMap<K, V> implements Map<K, V> {
       throw new IllegalArgumentException();
     }
     int i = indexFor(key);
-    for (Node<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        return e.value;  // found the key
+    Node<K, V> curr = buckets[i];
+    while (curr != null) {
+      if (curr.key.equals(key)) {
+        return curr.value;  // found the key
       }
+      curr = curr.next;
     }
     return null;  // key not present
   }
@@ -104,10 +103,12 @@ public class HashMap<K, V> implements Map<K, V> {
       throw new IllegalArgumentException();
     }
     int i = indexFor(key);
-    for (Node<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
+    Node<K, V> curr = buckets[i];
+    while (curr != null) {
+      if (curr.key.equals(key)) {
         return true;
       }
+      curr = curr.next;
     }
     return false;
   }
@@ -118,18 +119,20 @@ public class HashMap<K, V> implements Map<K, V> {
       throw new IllegalArgumentException();
     }
     int i = indexFor(key);
-    Node<K, V> previous = null;
-    for (Node<K, V> e = buckets[i]; e != null; e = e.next) {
-      if (e.key.equals(key)) {
-        if (previous == null) {
-          buckets[i] = e.next;      // the match was the head of the bucket
+    Node<K, V> prev = null;
+    Node<K, V> curr = buckets[i];
+    while (curr != null) {
+      if (curr.key.equals(key)) {
+        if (prev == null) {
+          buckets[i] = curr.next;  // the match was the head of the bucket
         } else {
-          previous.next = e.next;   // unlink the match
+          prev.next = curr.next;   // unlink the match
         }
         size--;
         return true;
       }
-      previous = e;
+      prev = curr;
+      curr = curr.next;
     }
     return false;  // not found; nothing changed
   }
@@ -159,18 +162,18 @@ public class HashMap<K, V> implements Map<K, V> {
     if (primeIndex + 1 < PRIMES.length) {
       capacity = PRIMES[++primeIndex];   // the next prime, already more than double
     } else {
-      capacity = 2 * old.length + 1;     // past the table: double and add one to stay odd
+      capacity = 2 * old.length + 1;     // past the array: double and add one to stay odd
     }
     buckets = (Node<K, V>[]) new Node[capacity];
 
-    for (Node<K, V> head : old) {                           // each old bucket
-      Node<K, V> e = head;
-      while (e != null) {
-        Node<K, V> next = e.next;                           // save the rest before relinking
-        int i = Math.floorMod(e.key.hashCode(), capacity);  // the entry's index in the new array
-        e.next = buckets[i];                                // move e to the front of its new bucket
-        buckets[i] = e;
-        e = next;
+    for (Node<K, V> head : old) {     // each old bucket
+      Node<K, V> curr = head;
+      while (curr != null) {
+        Node<K, V> next = curr.next;  // save the rest before relinking
+        int i = indexFor(curr.key);   // buckets is the new array, so this is the new index
+        curr.next = buckets[i];       // move curr to the head of its new bucket
+        buckets[i] = curr;
+        curr = next;
       }
     }
   }
@@ -205,26 +208,26 @@ public class HashMap<K, V> implements Map<K, V> {
 
   // Visits each slot in order and traverses its bucket, returning each entry itself.
   private class EntryIterator implements Iterator<Map.Entry<K, V>> {
-    private Node<K, V> current;  // the entry that comes next, or null when the traversal is done
+    private Node<K, V> curr;     // the entry that comes next, or null when the traversal is done
     private int slot = 0;        // the next slot to try when the current bucket runs out
 
     EntryIterator() {
-      advance();  // position current on the first entry, if there is one
+      advance();  // position curr on the first entry, if there is one
     }
 
     private void advance() {
-      if (current != null) {
-        current = current.next;    // the next entry in the same bucket
+      if (curr != null) {
+        curr = curr.next;          // the next entry in the same bucket
       }
-      while (current == null && slot < buckets.length) {
-        current = buckets[slot];   // the head of the next bucket, or null for an empty slot
+      while (curr == null && slot < buckets.length) {
+        curr = buckets[slot];      // the head of the next bucket, or null for an empty slot
         slot++;
       }
     }
 
     @Override
     public boolean hasNext() {
-      return current != null;
+      return curr != null;
     }
 
     @Override
@@ -232,7 +235,7 @@ public class HashMap<K, V> implements Map<K, V> {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
-      Node<K, V> node = current;
+      Node<K, V> node = curr;
       advance();
       return node;
     }

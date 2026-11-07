@@ -32,9 +32,9 @@ public class HashMapTest extends MapTest {
   }
 
   @Test
-  public void putAppendsCollidingKeysToTheBucket() {
+  public void putAddsCollidingKeysAtTheHeadOfTheBucket() {
     HashMap<String, Integer> table = fourKeys();
-    assertEquals(listOf("bee", "pig", "hen"), keysInSlot(table, 5));
+    assertEquals(listOf("hen", "pig", "bee"), keysInSlot(table, 5));
   }
 
   @Test
@@ -55,7 +55,7 @@ public class HashMapTest extends MapTest {
     HashMap<String, Integer> table = new HashMap<>();
     table.put("Aa", 1);  // "Aa" and "BB" both have hashCode 2112
     table.put("BB", 2);
-    assertEquals(listOf("Aa", "BB"), keysInSlot(table, 5));
+    assertEquals(listOf("BB", "Aa"), keysInSlot(table, 5));
   }
 
   @Test
@@ -99,41 +99,41 @@ public class HashMapTest extends MapTest {
   @Test
   public void getFindsTheLastKeyInABucket() {
     HashMap<String, Integer> table = fourKeys();
-    assertEquals(60, table.get("hen"));
+    assertEquals(40, table.get("bee"));
   }
 
   @Test
   public void containsKeyFindsTheLastKeyInABucket() {
     HashMap<String, Integer> table = fourKeys();
-    assertTrue(table.containsKey("hen"));
+    assertTrue(table.containsKey("bee"));
   }
 
   @Test
   public void putExistingKeyKeepsTheBucketOrder() {
     HashMap<String, Integer> table = fourKeys();
     table.put("bee", 99);
-    assertEquals(listOf("bee", "pig", "hen"), keysInSlot(table, 5));
+    assertEquals(listOf("hen", "pig", "bee"), keysInSlot(table, 5));
   }
 
   @Test
   public void removeHeadOfBucketKeepsTheRest() {
     HashMap<String, Integer> table = fourKeys();
-    table.remove("bee");
-    assertEquals(listOf("pig", "hen"), keysInSlot(table, 5));
+    table.remove("hen");
+    assertEquals(listOf("pig", "bee"), keysInSlot(table, 5));
   }
 
   @Test
   public void removeMiddleOfBucketLinksAroundIt() {
     HashMap<String, Integer> table = fourKeys();
     table.remove("pig");
-    assertEquals(listOf("bee", "hen"), keysInSlot(table, 5));
+    assertEquals(listOf("hen", "bee"), keysInSlot(table, 5));
   }
 
   @Test
   public void removeLastOfBucketEndsTheBucketEarly() {
     HashMap<String, Integer> table = fourKeys();
-    table.remove("hen");
-    assertEquals(listOf("bee", "pig"), keysInSlot(table, 5));
+    table.remove("bee");
+    assertEquals(listOf("hen", "pig"), keysInSlot(table, 5));
   }
 
   @Test
@@ -150,7 +150,7 @@ public class HashMapTest extends MapTest {
     for (String key : table) {
       seen.add(key);
     }
-    assertEquals(listOf("cat", "bee", "pig", "hen"), seen);
+    assertEquals(listOf("cat", "hen", "pig", "bee"), seen);
   }
 
   @Test
@@ -160,7 +160,7 @@ public class HashMapTest extends MapTest {
     for (Map.Entry<String, Integer> entry : table.entries()) {
       seen.add(entry.key() + "=" + entry.value());
     }
-    assertEquals(listOf("cat=10", "bee=40", "pig=50", "hen=60"), seen);
+    assertEquals(listOf("cat=10", "hen=60", "pig=50", "bee=40"), seen);
   }
 
   @Test
@@ -185,7 +185,7 @@ public class HashMapTest extends MapTest {
     table.put("bee", 40);  // bee, pig, and hen all go to slot 5
     table.put("pig", 50);
     table.put("hen", 60);
-    assertEquals(listOf("bee", "pig", "hen"), keysOf(table));
+    assertEquals(listOf("hen", "pig", "bee"), keysOf(table));
   }
 
   @Test

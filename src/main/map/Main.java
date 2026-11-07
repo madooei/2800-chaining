@@ -3,7 +3,7 @@ package map;
 /**
  * Runs the chapter's trace: cat, bee, pig, and hen go into a seven-slot table,
  * where bee, pig, and hen share one bucket. Then bee is overwritten, hen is
- * looked up, pig is removed, and fox is not found.
+ * looked up, pig and hen are removed, and fox is not found.
  */
 public class Main {
 
@@ -21,8 +21,9 @@ public class Main {
 
     System.out.println("get hen: " + counts.get("hen"));      // 60
     System.out.println("remove pig: " + counts.remove("pig"));  // true
+    System.out.println("remove hen: " + counts.remove("hen"));  // true
     System.out.println("remove fox: " + counts.remove("fox"));  // false, never put
-    System.out.println("size: " + counts.size());               // 3
+    System.out.println("size: " + counts.size());               // 2
 
     System.out.println("keys:");
     for (String key : counts) {
