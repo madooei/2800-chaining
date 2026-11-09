@@ -1,6 +1,7 @@
 package map;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * A hash table implementation of the Map ADT that resolves collisions by
@@ -145,10 +146,6 @@ public class HashMap<K, V> implements Map<K, V> {
       throw new UnsupportedOperationException("TODO: Implement me");
     }
 
-    private void advance() {
-      // TODO: Implement me
-      throw new UnsupportedOperationException("TODO: Implement me");
-    }
 
     @Override
     public boolean hasNext() {
