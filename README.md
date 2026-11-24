@@ -50,7 +50,7 @@ code/
 - `scripts/test.sh map.HashMapTest` runs only that test class.
 - `scripts/run.sh demo.HashMapDemo` compiles everything and runs that one demo. Every class you implement has its own demo, `<Class>Demo`.
 
-## What's here
+## Contents
 
 - `map.Map<K, V>`: the Map ADT, copied unchanged from the earlier chapters.
 - `map.HashMap<K, V>`: the chapter's hash table. It has `put`, `get`, `containsKey`, `remove`, and `size`, and the two iterators the `Map` interface asks for, `iterator()` over the keys and `entries()` over the pairs.
